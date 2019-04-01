@@ -4,7 +4,7 @@ Prerequisites:
 
 [HOOMD-blue](https://github.com/glotzerlab/hoomd-blue)
 
-[signac](https://github.com/glotzerlab/signacow)
+[signac](https://github.com/glotzerlab/signac)
 
 [signac-flow](https://github.com/glotzerlab/signac-flow) (version 0.8.0)
 
