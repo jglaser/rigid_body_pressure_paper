@@ -3,7 +3,9 @@
 Prerequisites:
 
 [HOOMD-blue](https://github.com/glotzerlab/hoomd-blue)
+
 [signac](https://github.com/glotzerlab/signacow)
+
 [signac-flow](https://github.com/glotzerlab/signac-flow) (version 0.8.0)
 
 HOOMD-blue 2.5.0 needs to be compiled with `-D ENABLE_CUDA=ON -D ENABLE_MPI=ON`.
