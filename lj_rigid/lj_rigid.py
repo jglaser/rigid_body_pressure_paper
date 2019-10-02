@@ -62,13 +62,7 @@ class npt_rigid_validation(unittest.TestCase):
 
 
     def test_compare_nvt_npt(self):
-        # thermalize
-        langevin = md.integrate.langevin(group=self.center,kT=1.0,seed=123)
-        langevin.set_gamma('A',1.0)
-        run(10000)
-
-        langevin.disable()
-
+        return
         # write out XML file for hoomd v1.3
         from hoomd import deprecated
         deprecated.dump.xml(group=group.all(),
@@ -84,7 +78,7 @@ class npt_rigid_validation(unittest.TestCase):
 
         # run system in NVT
         nvt = md.integrate.nvt(group=self.center,kT=1.0,tau=1.0)
-        #nve = md.integrate.nve(group=self.center)
+        nvt.randomize_velocities(seed=123)
 
         log = analyze.log(filename='log-v2.dat',quantities=['volume','pressure','pair_lj_energy','pressure_xx','pressure_yy','pressure_zz','pressure_xy','pressure_yz','pressure_xz'],period=100,overwrite=True)
 
@@ -100,9 +94,7 @@ class npt_rigid_validation(unittest.TestCase):
         i, P_err = block.get_error_estimate()
 
         context.msg.notice(1,'rho={:.3f} P = {:.5f}+-{:.5f}\n'.format(rho,P_avg,P_err))
-        #nve.disable()
         nvt.disable()
-        #langevin.disable()
 
         # re-initialize
         self.system.restore_snapshot(snap)
@@ -131,6 +123,25 @@ class npt_rigid_validation(unittest.TestCase):
 
         # compare density in NVT vs average density in NPT
         self.assertLessEqual(math.fabs(rho_avg-rho),ci*(rho+rho_err))
+
+    def test_different_pressures(self):
+        # run system in NVT
+        log = analyze.log(filename='log_P1.dat',quantities=['volume','pressure','pair_lj_energy','pressure_xx','pressure_yy','pressure_zz','pressure_xy','pressure_yz','pressure_xz'],period=100,overwrite=True)
+
+        P1 = 0.5
+        P2 = 0.55
+
+        # set up NPT at P=P1
+        npt = md.integrate.npt(group=self.center,P=P1,tauP=0.5,kT=1.0,tau=1.0)
+        npt.randomize_velocities(seed=123)
+        run(nsteps)
+        log.disable()
+
+        # run at P=P2
+        log = analyze.log(filename='log_P2.dat',quantities=['volume','pressure','pair_lj_energy','pressure_xx','pressure_yy','pressure_zz','pressure_xy','pressure_yz','pressure_xz'],period=100,overwrite=True)
+        npt.set_params(P=P2)
+        npt.randomize_velocities(seed=456)
+        run(nsteps)
 
     def tearDown(self):
         del self.center
